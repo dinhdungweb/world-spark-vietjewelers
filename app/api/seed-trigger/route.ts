@@ -40,26 +40,13 @@ export async function GET(request: Request) {
             });
         }
 
-        // 3. Create Sparks (Only if empty or few)
+        // 3. Create Sparks (If count is low)
         const count = await prisma.spark.count();
         let createdCount = 0;
 
-        if (count < 20) {
-            // Generate 50 sparks
-            const locations = [
-                { lat: 21.0285, lng: 105.8542, name: 'Hanoi, Vietnam' },
-                { lat: 10.8231, lng: 106.6297, name: 'Ho Chi Minh City, Vietnam' },
-                { lat: 40.7128, lng: -74.0060, name: 'New York, USA' },
-                { lat: 48.8566, lng: 2.3522, name: 'Paris, France' },
-                { lat: 35.6762, lng: 139.6503, name: 'Tokyo, Japan' },
-                { lat: 51.5074, lng: -0.1278, name: 'London, UK' },
-                { lat: -33.8688, lng: 151.2093, name: 'Sydney, Australia' },
-                { lat: 55.7558, lng: 37.6173, name: 'Moscow, Russia' },
-                { lat: 1.3521, lng: 103.8198, name: 'Singapore' },
-                { lat: 37.5665, lng: 126.9780, name: 'Seoul, South Korea' },
-                // ... add random variates around these
-            ];
-
+        // Trigger seeding if we have fewer than 100 sparks
+        if (count < 100) {
+            // Generate 300 sparks needed for a nice globe
             const sampleTexts = [
                 "I wish I could fly to the moon.",
                 "Hope everyone has a great day!",
@@ -70,24 +57,34 @@ export async function GET(request: Request) {
                 "Coffee is the best invention ever.",
                 "Dreaming of a peaceful world.",
                 "Why is coding so addictive?",
-                "Rainy days make me feel nostalgic."
+                "Rainy days make me feel nostalgic.",
+                "Sending love to everyone ❤️",
+                "Peace and love from my corner of the world.",
+                "Starry nights are the best.",
+                "Believe in yourself!",
+                "Travel is the only thing you buy that makes you richer.",
+                "Music heals the soul."
             ];
 
-            for (let i = 0; i < 50; i++) {
-                const baseLoc = locations[Math.floor(Math.random() * locations.length)];
-                // Randomize location slightly within ~50km
-                const lat = baseLoc.lat + (Math.random() - 0.5) * 0.5;
-                const lng = baseLoc.lng + (Math.random() - 0.5) * 0.5;
+            for (let i = 0; i < 300; i++) {
+                // Fully random global coordinates
+                // Lat: -60 to 80 (avoid extreme poles where map distorts or is uninhabited)
+                const lat = (Math.random() * 140) - 60;
+                // Lng: -180 to 180
+                const lng = (Math.random() * 360) - 180;
+
+                const cityName = faker.location.city();
+                const countryName = faker.location.country();
 
                 await prisma.spark.create({
                     data: {
-                        text: i % 3 === 0 ? sampleTexts[i % sampleTexts.length] : faker.lorem.sentence(),
+                        text: i % 4 === 0 ? sampleTexts[i % sampleTexts.length] : faker.lorem.sentence({ min: 3, max: 10 }),
                         latitude: lat,
                         longitude: lng,
                         category: categories[Math.floor(Math.random() * categories.length)],
-                        locationDisplay: baseLoc.name,
-                        status: Math.random() > 0.1 ? 'approved' : 'pending',
-                        createdAt: faker.date.recent({ days: 30 }),
+                        locationDisplay: `${cityName}, ${countryName}`,
+                        status: Math.random() > 0.05 ? 'approved' : 'pending', // 95% approved
+                        createdAt: faker.date.recent({ days: 60 }),
                         approvedAt: new Date(),
                     },
                 });
