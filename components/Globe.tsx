@@ -432,6 +432,8 @@ export default function Globe({ sparks = [], onSparkClick, onGlobeClick }: Globe
           zoomSpeed={1.0}
           enableDamping={true}
           dampingFactor={0.05}
+          autoRotate={true}
+          autoRotateSpeed={0.3}
           touches={{
             ONE: THREE.TOUCH.ROTATE,
             TWO: THREE.TOUCH.DOLLY_PAN,
