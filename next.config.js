@@ -2,21 +2,21 @@
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['three'],
-  
+
   // Performance optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  
+
   // Image optimization (for future use)
   images: {
     formats: ['image/webp', 'image/avif'],
   },
-  
-  
+
+
   // Optimize production builds
   productionBrowserSourceMaps: false,
-  
+
   // Security headers
   async headers() {
     return [
@@ -47,7 +47,9 @@ const nextConfig = {
       },
     ];
   },
-  
+
+  // Prevent build issues with jsdom/isomorphic-dompurify
+  serverExternalPackages: ['jsdom', 'isomorphic-dompurify'],
 }
 
 module.exports = nextConfig
