@@ -48,8 +48,8 @@ const nextConfig = {
     ];
   },
 
-  // Prevent build issues with jsdom/isomorphic-dompurify
-  serverExternalPackages: ['jsdom', 'isomorphic-dompurify'],
+  // Prevent build issues with jsdom (keep jsdom external, let bundler handle others)
+  serverExternalPackages: ['jsdom'],
 }
 
 module.exports = nextConfig
