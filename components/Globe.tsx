@@ -308,11 +308,13 @@ function ResponsiveCamera() {
   const { camera, size } = useThree();
 
   useEffect(() => {
-    // If screen width is less than 768px (mobile), move camera back
-    if (size.width < 768) {
-      camera.position.z = 14; // Further away on mobile (smaller globe)
+    // Check window width directly to be reliable across devices
+    const isMobile = window.innerWidth < 768; // Standard mobile breakpoint
+
+    if (isMobile) {
+      camera.position.z = 18; // Much further away -> Smaller globe appearance
     } else {
-      camera.position.z = 8; // Standard distance on desktop
+      camera.position.z = 8;
     }
     camera.updateProjectionMatrix();
   }, [size.width, camera]);
