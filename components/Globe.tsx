@@ -59,12 +59,12 @@ export function updateRotationFromTouch(
 ): [number, number, number] {
   const [rotX, rotY, rotZ] = currentRotation;
   const [deltaX, deltaY] = touchDelta;
-  
+
   // Touch rotation uses the same logic as mouse drag
   // Rotation is proportional to touch delta and rotate speed
   const newRotY = rotY + deltaX * rotateSpeed * 0.01;
   const newRotX = rotX + deltaY * rotateSpeed * 0.01;
-  
+
   return [newRotX, newRotY, rotZ];
 }
 
@@ -88,7 +88,7 @@ export function updateCameraDistanceFromPinch(
   // negative = pinch in (zoom out, increase distance)
   // This matches the intuitive pinch gesture behavior
   const newDistance = currentDistance - pinchDelta * zoomSpeed;
-  
+
   // Clamp to min/max bounds
   return Math.max(minDistance, Math.min(maxDistance, newDistance));
 }
@@ -103,7 +103,7 @@ function Sparks({ sparks, onSparkClick, globeRadius }: SparksProps) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const { camera } = useThree();
-  
+
   // Store spark data for click handling
   const sparkDataRef = useRef<Spark[]>(sparks);
   sparkDataRef.current = sparks;
@@ -115,7 +115,7 @@ function Sparks({ sparks, onSparkClick, globeRadius }: SparksProps) {
 
   // Calculate positions for all sparks
   const positions = useMemo(() => {
-    return sparks.map(spark => 
+    return sparks.map(spark =>
       latLngToVector3(spark.latitude, spark.longitude, globeRadius)
     );
   }, [sparks, globeRadius]);
@@ -161,12 +161,12 @@ function Sparks({ sparks, onSparkClick, globeRadius }: SparksProps) {
 
       dummy.position.copy(position);
       dummy.lookAt(0, 0, 0);
-      
+
       // Pulsing scale animation
       const pulseScale = 1 + Math.sin(time * 2 + i * 0.1) * 0.3;
       const baseScale = i === hoveredIndex ? 1.5 : 1.0;
       dummy.scale.setScalar(baseScale * pulseScale);
-      
+
       dummy.updateMatrix();
       meshRef.current!.setMatrixAt(i, dummy.matrix);
     });
@@ -220,22 +220,48 @@ function Sparks({ sparks, onSparkClick, globeRadius }: SparksProps) {
 const GlobeSphere = memo(function GlobeSphere({ onClick }: { onClick?: (coordinates: { lat: number; lng: number }) => void }) {
   const meshRef = useRef<THREE.Mesh>(null);
 
-  const handleClick = (event: ThreeEvent<MouseEvent>) => {
-    if (!onClick) return;
-    
-    // Get the intersection point on the sphere
-    const point = event.point;
-    
-    // Convert 3D point back to lat/lng
-    const radius = Math.sqrt(point.x * point.x + point.y * point.y + point.z * point.z);
-    const lat = 90 - Math.acos(point.y / radius) * (180 / Math.PI);
-    const lng = Math.atan2(point.z, -point.x) * (180 / Math.PI) - 180;
-    
-    onClick({ lat, lng });
+  const isDragging = useRef(false);
+  const startPos = useRef({ x: 0, y: 0 });
+
+  const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
+    isDragging.current = false;
+    startPos.current = { x: event.clientX, y: event.clientY };
+  };
+
+  const handlePointerUp = (event: ThreeEvent<PointerEvent>) => {
+    // Calculate distance moved
+    const dx = event.clientX - startPos.current.x;
+    const dy = event.clientY - startPos.current.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // If moved more than 5 pixels, consider it a drag
+    if (distance > 5) {
+      isDragging.current = true;
+    } else {
+      isDragging.current = false;
+    }
+
+    // Only trigger click if not dragging
+    if (!isDragging.current && onClick) {
+      // Get the intersection point on the sphere
+      const point = event.point;
+
+      // Convert 3D point back to lat/lng
+      const radius = Math.sqrt(point.x * point.x + point.y * point.y + point.z * point.z);
+      const lat = 90 - Math.acos(point.y / radius) * (180 / Math.PI);
+      const lng = Math.atan2(point.z, -point.x) * (180 / Math.PI) - 180;
+
+      onClick({ lat, lng });
+    }
   };
 
   return (
-    <mesh ref={meshRef} onClick={handleClick}>
+    <mesh
+      ref={meshRef}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+    // Remove onClick to avoid conflict
+    >
       <sphereGeometry args={[2, 64, 64]} />
       <meshStandardMaterial
         color="#1a2332"
@@ -256,11 +282,11 @@ export default function Globe({ sparks = [], onSparkClick, onGlobeClick }: Globe
   useEffect(() => {
     const supported = detectWebGL();
     setWebGLSupported(supported);
-    
+
     if (!supported) {
       console.warn('WebGL is not supported in this browser');
     }
-    
+
     // Debug: Log sparks received
     console.log('Globe component received sparks:', sparks.length);
   }, []);

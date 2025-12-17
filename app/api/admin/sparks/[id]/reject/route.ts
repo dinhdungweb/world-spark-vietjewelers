@@ -11,12 +11,12 @@ import { securityHeaders } from '@/lib/security';
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verify admin authentication
     const session = await requireAuth();
-    
+
     // CSRF protection: Verify origin header matches host (if origin is present)
     const origin = request.headers?.get('origin');
     const host = request.headers?.get('host');
@@ -26,9 +26,9 @@ export async function POST(
         { status: 403, headers: securityHeaders }
       );
     }
-    
-    const sparkId = params.id;
-    
+
+    const sparkId = (await params).id;
+
     // Validate spark ID
     if (!sparkId) {
       return NextResponse.json(
@@ -36,13 +36,13 @@ export async function POST(
         { status: 400, headers: securityHeaders }
       );
     }
-    
+
     // Reject the spark
     await sparkService.rejectSpark(sparkId);
-    
+
     // Log moderation action for audit trail
     console.log(`[ADMIN] Spark ${sparkId} rejected by ${session.user.email} at ${new Date().toISOString()}`);
-    
+
     return NextResponse.json({
       message: 'Spark rejected successfully'
     }, {
@@ -50,7 +50,7 @@ export async function POST(
     });
   } catch (error) {
     console.error('Error rejecting spark:', error);
-    
+
     // Handle authentication errors
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json(
@@ -58,7 +58,7 @@ export async function POST(
         { status: 401, headers: securityHeaders }
       );
     }
-    
+
     // Handle not found errors (Prisma throws if record doesn't exist)
     if (error instanceof Error && error.message.includes('Record to update not found')) {
       return NextResponse.json(
@@ -66,7 +66,7 @@ export async function POST(
         { status: 404, headers: securityHeaders }
       );
     }
-    
+
     // Handle other errors
     return NextResponse.json(
       { error: 'Failed to reject spark', code: 'REJECT_ERROR' },

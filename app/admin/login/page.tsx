@@ -1,10 +1,10 @@
 'use client';
 
 import { signIn } from 'next-auth/react';
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function AdminLoginPage() {
+function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
@@ -105,5 +105,13 @@ export default function AdminLoginPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center text-foreground font-light">Loading...</div>}>
+      <AdminLoginForm />
+    </Suspense>
   );
 }

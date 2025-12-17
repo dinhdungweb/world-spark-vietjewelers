@@ -23,26 +23,26 @@ export default function Home() {
       try {
         setIsLoading(true);
         setError(null);
-        
+
         const response = await fetch('/api/sparks');
-        
+
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           throw new Error(errorData.error || 'Failed to fetch sparks');
         }
-        
+
         const data = await response.json();
-        
+
         // Convert date strings to Date objects
         const sparksWithDates = data.map((spark: any) => ({
           ...spark,
           createdAt: new Date(spark.createdAt)
         }));
-        
+
         setSparks(sparksWithDates);
       } catch (err) {
         console.error('Error fetching sparks:', err);
-        
+
         // Provide user-friendly error messages
         if (err instanceof TypeError && err.message.includes('fetch')) {
           setError('Network error: Unable to connect to the server. Please check your internet connection.');
@@ -69,7 +69,7 @@ export default function Home() {
   const handleNextSpark = async () => {
     try {
       const response = await fetch('/api/sparks/random');
-      
+
       if (!response.ok) {
         if (response.status === 404) {
           // No sparks available - silently return
@@ -78,13 +78,13 @@ export default function Home() {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || 'Failed to fetch random spark');
       }
-      
+
       const data = await response.json();
       const sparkWithDate = {
         ...data,
         createdAt: new Date(data.createdAt)
       };
-      
+
       setSelectedSpark(sparkWithDate);
     } catch (err) {
       console.error('Error fetching random spark:', err);
@@ -102,8 +102,10 @@ export default function Home() {
 
   // Handle globe click for location selection (only when form is open)
   const handleGlobeClick = (coordinates: { lat: number; lng: number }) => {
-    if (showForm) {
-      setGlobeClickLocation(coordinates);
+    setGlobeClickLocation(coordinates);
+    if (!showForm) {
+      setShowForm(true);
+      setSelectedSpark(null); // Deselect any selected spark
     }
   };
 
@@ -145,6 +147,30 @@ export default function Home() {
     setSelectedSpark(null);
   };
 
+  const FloatingActionButton = () => (
+    <button
+      onClick={handleAddSpark}
+      className="absolute bottom-8 right-8 z-20 w-14 h-14 bg-foreground text-background rounded-full shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200 group"
+      aria-label="Add Spark"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="group-hover:rotate-90 transition-transform duration-200"
+      >
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+    </button>
+  );
+
   return (
     <main className="relative w-full h-screen bg-black">
       {/* Loading state */}
@@ -174,9 +200,12 @@ export default function Home() {
         <Globe
           sparks={sparks}
           onSparkClick={handleSparkClick}
-          onGlobeClick={showForm ? handleGlobeClick : undefined}
+          onGlobeClick={handleGlobeClick}
         />
       )}
+
+      {/* Floating Action Button */}
+      {!error && !showForm && !selectedSpark && <FloatingActionButton />}
 
       {/* Spark card overlay */}
       {selectedSpark && !showForm && (
