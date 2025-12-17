@@ -306,17 +306,24 @@ const GlobeSphere = memo(function GlobeSphere({ onClick }: { onClick?: (coordina
 
 function ResponsiveCamera() {
   const { camera, size } = useThree();
+  const isMobileRef = useRef<boolean | null>(null);
 
   useEffect(() => {
     // Check window width directly to be reliable across devices
-    const isMobile = window.innerWidth < 768; // Standard mobile breakpoint
+    // Use window.innerWidth for consistency, but track changes
+    const isMobile = window.innerWidth < 768;
 
-    if (isMobile) {
-      camera.position.z = 18; // Much further away -> Smaller globe appearance
-    } else {
-      camera.position.z = 8;
+    // Only update camera position if the device mode (mobile/desktop) actually changes
+    // This prevents resetting the camera if the user simply resizes the window slightly or zooms manually
+    if (isMobileRef.current !== isMobile) {
+      if (isMobile) {
+        camera.position.z = 18; // Mobile distance (smaller globe)
+      } else {
+        camera.position.z = 8; // Desktop distance
+      }
+      camera.updateProjectionMatrix();
+      isMobileRef.current = isMobile;
     }
-    camera.updateProjectionMatrix();
   }, [size.width, camera]);
 
   return null;
