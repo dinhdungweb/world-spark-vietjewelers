@@ -150,7 +150,7 @@ export default function Home() {
   const FloatingActionButton = () => (
     <button
       onClick={handleAddSpark}
-      className="absolute bottom-8 right-8 z-20 w-14 h-14 bg-foreground text-background rounded-full shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200 group"
+      className="absolute bottom-20 md:bottom-8 right-6 md:right-8 z-20 w-14 h-14 bg-foreground text-background rounded-full shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200 group"
       aria-label="Add Spark"
     >
       <svg
@@ -172,7 +172,7 @@ export default function Home() {
   );
 
   return (
-    <main className="relative w-full h-screen bg-black">
+    <main className="relative w-full h-[100dvh] bg-black overflow-hidden">
       {/* Loading state */}
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center z-10">
@@ -231,7 +231,7 @@ export default function Home() {
       )}
 
       {/* Footer - subtle and minimal per Requirement 7.3 */}
-      <footer className="absolute bottom-3 left-0 right-0 text-center pointer-events-none select-none">
+      <footer className="absolute bottom-6 md:bottom-3 left-0 right-0 text-center pointer-events-none select-none px-4">
         <p className="text-[11px] text-gray-600/70 tracking-wide font-light">
           World Spark is a quiet side project by Viet Jewelers, Hanoi.
         </p>

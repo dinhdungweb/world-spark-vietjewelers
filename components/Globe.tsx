@@ -310,7 +310,7 @@ function ResponsiveCamera() {
   useEffect(() => {
     // If screen width is less than 768px (mobile), move camera back
     if (size.width < 768) {
-      camera.position.z = 12; // Further away on mobile
+      camera.position.z = 14; // Further away on mobile (smaller globe)
     } else {
       camera.position.z = 8; // Standard distance on desktop
     }
