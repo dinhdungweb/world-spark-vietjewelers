@@ -32,14 +32,10 @@ export class LocationService {
   async reverseGeocode(lat: number, lng: number): Promise<string> {
     try {
       // Use Nominatim API with appropriate headers
-      const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1`;
+      // Use internal API proxy to handle geocoding server-side
+      const url = `/api/geocode?lat=${lat}&lng=${lng}`;
 
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'WorldSpark/1.0', // Required by Nominatim usage policy
-          'Accept-Language': 'en' // Get results in English
-        }
-      });
+      const response = await fetch(url);
 
       if (!response.ok) {
         throw new Error(`Geocoding failed: ${response.status}`);

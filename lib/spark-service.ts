@@ -54,16 +54,53 @@ export class SparkService {
    * Retrieves all pending sparks for admin moderation
    */
   async getPendingSparks(): Promise<Spark[]> {
+    return this.getSparksByStatus(SparkStatus.PENDING);
+  }
+
+  /**
+   * Retrieves sparks by status with pagination support
+   */
+  async getSparksByStatus(status: SparkStatus, take = 50, skip = 0): Promise<Spark[]> {
     const sparks = await prisma.spark.findMany({
       where: {
-        status: SparkStatus.PENDING
+        status: status
       },
-      orderBy: {
-        createdAt: 'asc'
-      }
+      orderBy: status === SparkStatus.PENDING ? { createdAt: 'asc' } : { approvedAt: 'desc' },
+      take,
+      skip
     });
 
     return sparks.map(this.mapSparkFromDb);
+  }
+
+  /**
+   * Returns count of sparks grouped by status
+   */
+  async getSparkCounts(): Promise<{ pending: number; approved: number; rejected: number }> {
+    const counts = await prisma.spark.groupBy({
+      by: ['status'],
+      _count: {
+        id: true
+      }
+    });
+
+    // Default to 0
+    const result = {
+      [SparkStatus.PENDING]: 0,
+      [SparkStatus.APPROVED]: 0,
+      [SparkStatus.REJECTED]: 0
+    };
+
+    counts.forEach(c => {
+      // @ts-ignore
+      result[c.status] = c._count.id;
+    });
+
+    return {
+      pending: result[SparkStatus.PENDING],
+      approved: result[SparkStatus.APPROVED],
+      rejected: result[SparkStatus.REJECTED]
+    };
   }
 
   /**

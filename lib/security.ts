@@ -3,26 +3,20 @@
  * Requirements: All (security)
  */
 
-import DOMPurify from 'isomorphic-dompurify';
-
-/**
- * Sanitize user input to prevent XSS attacks
- * Removes all HTML tags and potentially dangerous content
- */
+// Simple regex-based strip tags is safer and lighter for this use case
+// or better: escape HTML entities to display them as text
 export function sanitizeInput(input: string): string {
   if (!input || typeof input !== 'string') {
     return '';
   }
-  
-  // Use DOMPurify to sanitize, but strip all HTML tags
-  // We only want plain text for sparks
-  const sanitized = DOMPurify.sanitize(input, {
-    ALLOWED_TAGS: [], // No HTML tags allowed
-    ALLOWED_ATTR: [], // No attributes allowed
-    KEEP_CONTENT: true, // Keep text content
-  });
-  
-  return sanitized.trim();
+
+  return input
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;")
+    .trim();
 }
 
 /**

@@ -40,23 +40,23 @@ const SparkCard = memo(function SparkCard({ spark, onClose, onNext, onAddSpark }
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none px-4">
+    <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none px-4 bg-black/40 backdrop-blur-[2px] transition-all duration-300">
       <div
         ref={cardRef}
-        className="bg-card border border-card-border rounded-xl p-6 max-w-md w-full pointer-events-auto shadow-card animate-fade-in"
+        className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl p-6 max-w-md w-full pointer-events-auto shadow-2xl animate-fade-in"
       >
         {/* Spark text */}
-        <p className="text-foreground text-lg mb-5 leading-relaxed font-light">
-          {spark.text}
+        <p className="text-white text-lg mb-6 leading-relaxed font-light">
+          "{spark.text}"
         </p>
 
         {/* Category and Location */}
-        <div className="flex items-center gap-3 mb-6 text-sm">
-          <span className="text-muted-foreground/80 uppercase tracking-wider text-xs font-medium">
+        <div className="flex items-center gap-3 mb-8 text-sm border-t border-[#2a2a2a] pt-4">
+          <span className="text-blue-400 uppercase tracking-wider text-[10px] font-semibold bg-blue-900/10 px-2 py-1 rounded">
             {spark.category}
           </span>
-          <span className="text-muted/50">·</span>
-          <span className="text-muted-foreground/70 font-light">
+          <span className="text-gray-500 font-light text-xs flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
             {spark.locationDisplay}
           </span>
         </div>
@@ -65,13 +65,13 @@ const SparkCard = memo(function SparkCard({ spark, onClose, onNext, onAddSpark }
         <div className="flex gap-3">
           <button
             onClick={onNext}
-            className="flex-1 px-4 py-2.5 bg-accent hover:bg-accent-hover text-foreground/90 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            className="flex-1 px-4 py-2 bg-[#222] hover:bg-[#333] text-gray-300 hover:text-white rounded-lg text-sm font-medium transition-all duration-200"
           >
             Next spark
           </button>
           <button
             onClick={onAddSpark}
-            className="flex-1 px-4 py-2.5 bg-accent hover:bg-accent-hover text-foreground/90 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            className="flex-1 px-4 py-2 bg-white hover:bg-gray-200 text-black rounded-lg text-sm font-medium transition-all duration-200"
           >
             Add your spark
           </button>

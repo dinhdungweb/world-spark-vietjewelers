@@ -186,9 +186,32 @@ function Sparks({ sparks, onSparkClick, globeRadius }: SparksProps) {
     setHoveredIndex(null);
   };
 
-  const handleClick = (event: ThreeEvent<MouseEvent>) => {
+  // Ref for tracking drag on sparks
+  const isDraggingRef = useRef(false);
+  const startPosRef = useRef({ x: 0, y: 0 });
+
+  const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
-    if (event.instanceId !== undefined && onSparkClick) {
+    isDraggingRef.current = false;
+    startPosRef.current = { x: event.clientX, y: event.clientY };
+  };
+
+  const handlePointerUp = (event: ThreeEvent<PointerEvent>) => {
+    event.stopPropagation();
+
+    // Calculate distance moved
+    const dx = event.clientX - startPosRef.current.x;
+    const dy = event.clientY - startPosRef.current.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // If moved more than 5 pixels, consider it a drag
+    if (distance > 5) {
+      isDraggingRef.current = true;
+    } else {
+      isDraggingRef.current = false;
+    }
+
+    if (!isDraggingRef.current && event.instanceId !== undefined && onSparkClick) {
       const spark = sparkDataRef.current[event.instanceId];
       if (spark) {
         onSparkClick(spark);
@@ -206,7 +229,9 @@ function Sparks({ sparks, onSparkClick, globeRadius }: SparksProps) {
       args={[undefined, undefined, sparks.length]}
       onPointerMove={handlePointerMove}
       onPointerOut={handlePointerOut}
-      onClick={handleClick}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+    // onClick removed as it conflicts with drag detection
     >
       <sphereGeometry args={[0.05, 16, 16]} />
       <meshBasicMaterial
@@ -249,7 +274,11 @@ const GlobeSphere = memo(function GlobeSphere({ onClick }: { onClick?: (coordina
       // Convert 3D point back to lat/lng
       const radius = Math.sqrt(point.x * point.x + point.y * point.y + point.z * point.z);
       const lat = 90 - Math.acos(point.y / radius) * (180 / Math.PI);
-      const lng = Math.atan2(point.z, -point.x) * (180 / Math.PI) - 180;
+      let lng = Math.atan2(point.z, -point.x) * (180 / Math.PI) - 180;
+
+      // Normalize longitude to -180 to 180
+      while (lng <= -180) lng += 360;
+      while (lng > 180) lng -= 360;
 
       onClick({ lat, lng });
     }
@@ -274,6 +303,23 @@ const GlobeSphere = memo(function GlobeSphere({ onClick }: { onClick?: (coordina
   );
 });
 
+
+function ResponsiveCamera() {
+  const { camera, size } = useThree();
+
+  useEffect(() => {
+    // If screen width is less than 768px (mobile), move camera back
+    if (size.width < 768) {
+      camera.position.z = 12; // Further away on mobile
+    } else {
+      camera.position.z = 8; // Standard distance on desktop
+    }
+    camera.updateProjectionMatrix();
+  }, [size.width, camera]);
+
+  return null;
+}
+
 export default function Globe({ sparks = [], onSparkClick, onGlobeClick }: GlobeProps) {
   const [webGLSupported, setWebGLSupported] = useState<boolean | null>(null);
   const [canvasError, setCanvasError] = useState<string | null>(null);
@@ -287,7 +333,6 @@ export default function Globe({ sparks = [], onSparkClick, onGlobeClick }: Globe
       console.warn('WebGL is not supported in this browser');
     }
 
-    // Debug: Log sparks received
     console.log('Globe component received sparks:', sparks.length);
   }, []);
 
@@ -353,6 +398,8 @@ export default function Globe({ sparks = [], onSparkClick, onGlobeClick }: Globe
         style={{ background: '#000000' }}
         onError={handleCanvasError}
       >
+        <ResponsiveCamera />
+
         {/* Lighting for better visibility */}
         <ambientLight intensity={0.8} />
         <directionalLight
@@ -371,14 +418,14 @@ export default function Globe({ sparks = [], onSparkClick, onGlobeClick }: Globe
         {/* Globe sphere */}
         <GlobeSphere onClick={onGlobeClick} />
 
-        {/* Spark points */}
-        <Sparks sparks={sparks} onSparkClick={onSparkClick} globeRadius={2} />
+        {/* Spark points - Slightly larger radius to prevent Z-fighting and ensuring occlusion doesn't block clicks */}
+        <Sparks sparks={sparks} onSparkClick={onSparkClick} globeRadius={2.02} />
 
         {/* Orbit controls for rotation and zoom */}
         <OrbitControls
           enablePan={false}
           minDistance={2.5}
-          maxDistance={15}
+          maxDistance={20}
           rotateSpeed={0.5}
           zoomSpeed={1.0}
           enableDamping={true}

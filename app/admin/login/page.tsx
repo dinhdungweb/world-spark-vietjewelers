@@ -41,17 +41,18 @@ function AdminLoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="max-w-md w-full space-y-8 animate-fade-in">
-        <div>
-          <h2 className="text-center text-2xl sm:text-3xl font-light text-foreground">
-            Admin Login
+    <div className="min-h-screen bg-black flex items-center justify-center px-4">
+      <div className="max-w-md w-full p-8 bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl shadow-2xl animate-fade-in">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-medium text-white tracking-tight">
+            Admin Access
           </h2>
-          <p className="mt-3 text-center text-sm text-muted-foreground font-light">
-            World Spark Moderation Panel
+          <p className="mt-2 text-sm text-gray-500">
+            World Spark Moderation
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+
+        <form className="space-y-5" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="sr-only">
@@ -65,7 +66,7 @@ function AdminLoginForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none relative block w-full px-4 py-3 border border-card-border bg-card placeholder-muted text-foreground rounded-lg focus:outline-none focus:ring-1 focus:ring-muted/50 focus:border-muted/50 transition-all duration-200"
+                className="block w-full px-4 py-3 bg-[#111] border border-[#333] rounded-lg text-white placeholder:text-gray-600 focus:outline-none focus:border-white/40 focus:ring-0 transition-all duration-200"
                 placeholder="Email address"
                 disabled={isLoading}
               />
@@ -82,7 +83,7 @@ function AdminLoginForm() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none relative block w-full px-4 py-3 border border-card-border bg-card placeholder-muted text-foreground rounded-lg focus:outline-none focus:ring-1 focus:ring-muted/50 focus:border-muted/50 transition-all duration-200"
+                className="block w-full px-4 py-3 bg-[#111] border border-[#333] rounded-lg text-white placeholder:text-gray-600 focus:outline-none focus:border-white/40 focus:ring-0 transition-all duration-200"
                 placeholder="Password"
                 disabled={isLoading}
               />
@@ -90,18 +91,18 @@ function AdminLoginForm() {
           </div>
 
           {error && (
-            <div className="text-red-400/90 text-sm text-center font-light animate-fade-in">{error}</div>
+            <div className="p-3 bg-red-900/10 border border-red-900/30 rounded-lg">
+              <p className="text-center text-sm text-red-400">{error}</p>
+            </div>
           )}
 
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-background bg-foreground hover:bg-foreground/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:ring-muted disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
-            >
-              {isLoading ? 'Signing in...' : 'Sign in'}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full flex justify-center py-3 px-4 bg-white hover:bg-gray-200 text-black rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? 'Authenticating...' : 'Sign in'}
+          </button>
         </form>
       </div>
     </div>
@@ -110,7 +111,7 @@ function AdminLoginForm() {
 
 export default function AdminLoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center text-foreground font-light">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-gray-500 text-sm">Loading...</div>}>
       <AdminLoginForm />
     </Suspense>
   );
