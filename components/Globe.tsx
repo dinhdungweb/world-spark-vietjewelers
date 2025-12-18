@@ -220,24 +220,11 @@ const GlobeSphere = memo(function GlobeSphere({ onClick }: { onClick?: (coordina
       >
         <sphereGeometry args={[2, 64, 64]} />
         <meshStandardMaterial
-          color="#0f172a" // Deep, rich dark blue
-          roughness={0.6}
-          metalness={0.2}
-          emissive="#1e293b"
-          emissiveIntensity={0.1}
-        />
-      </mesh>
-
-      {/* Atmosphere / Glow Effect */}
-      {/* A slightly larger sphere with transparent material to create a halo effect */}
-      <mesh scale={[1.03, 1.03, 1.03]}>
-        <sphereGeometry args={[2, 64, 64]} />
-        <meshBasicMaterial
-          color="#38bdf8"
-          transparent
-          opacity={0.08}
-          side={THREE.BackSide}
-          blending={THREE.AdditiveBlending}
+          color="#1e3a8a" // Brighter deep blue (blue-900)
+          roughness={0.7}
+          metalness={0.1}
+          emissive="#1e40af" // Glowing blue-800
+          emissiveIntensity={0.2}
         />
       </mesh>
     </group>
